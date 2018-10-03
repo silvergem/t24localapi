@@ -3,7 +3,7 @@
 * DATE CREATED        : SEP-06-2018
 * AUTHOR              : Chua, Jayson G
 * DESCRIPTION         : Local API Validation Routine attached Version INPUT.ROUTINE
-*                       Validate fields based on REGEX defined at EB.BUH.GEN.PARAM
+*                       Validate fields based on REGEX defined at EB.XXX.GEN.PARAM
 * REPORT NAME         :
 * PGM FILE            : N/A
 * TSA.SERVICE         : N/A
