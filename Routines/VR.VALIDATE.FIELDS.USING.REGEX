@@ -1,0 +1,76 @@
+****************************************************************
+* VERSION             : 1.0
+* DATE CREATED        : 06-SEP-2018
+* AUTHOR              : Chua, Jayson G
+* DESCRIPTION         : Local API Validation Routine attached at INPUT.ROUTINE
+*                       Validate fields based on REGEX defined at EB.XXX.GEN.PARAM
+* REPORT NAME         :
+* PGM FILE            : N/A
+* TSA.SERVICE         : N/A
+* BATCH               : N/A
+* SS FILE             : N/A
+* EB.API              : <Same with filename>
+* Associated          : VERSION>EB.XXX.GEN.PARAM,VALIDATE.FIELDS	
+****************************************************************
+* VERSION             :
+* DATE MODIFIED       :
+* MODIFIED BY         :
+* UPDATES             :
+****************************************************************
+    SUBROUTINE VR.VALIDATE.FIELDS.USING.REGEX
+    $INSERT ../T24_BP I_COMMON
+    $INSERT ../T24_BP I_EQUATE
+    $INSERT ../BP     I_F.EB.BUH.GEN.PARAM
+
+    GOSUB OPENFILES
+    GOSUB READFILES
+
+    IF R.PARAM NE '' THEN
+        GOSUB READSS
+        GOSUB PROCESS
+    END
+
+    RETURN
+
+OPENFILES:
+    FN.PARAM   = "F.EB.BUH.GEN.PARAM"
+    F.PARAM    = ""
+
+    CALL OPF(FN.PARAM,F.PARAM)
+    RETURN
+
+READFILES:
+    Y.PARAM.ID = APPLICATION : PGM.VERSION
+    CALL F.READ(FN.PARAM,Y.PARAM.ID,R.PARAM,F.PARAM,Y.ERR.PARAM)
+    Y.REGEX      = R.PARAM<EB.BUH7.GEN.PARAM.1>
+    Y.FIELDS     = R.PARAM<EB.BUH7.GEN.PARAM.1.1>
+    Y.FIELDS.CNT = DCOUNT(Y.FIELDS,@SM)
+    Y.ERROR.ID   = R.PARAM<EB.BUH7.GEN.PARAM.2>
+    Y.APP.NAME   = R.PARAM<EB.BUH7.REPORT.FILENAME>
+    RETURN
+
+READSS:
+    Y.APP.NAME   = R.PARAM<EB.BUH7.REPORT.FILENAME>
+    Y.APP.SS.REC = ''
+    CALL GET.STANDARD.SELECTION.DETS(Y.APP.NAME, Y.APP.SS.REC)
+    RETURN
+
+PROCESS:
+    FOR I = 1 TO Y.FIELDS.CNT
+        Y.FIELD      = FIELD (Y.FIELDS,@SM,I,1)
+
+        CALL FIELD.NAMES.TO.NUMBERS(Y.FIELD, Y.APP.SS.REC, Y.FIELD.NO, '','', '', '', ERR.MSG)
+        Y.FIELD.DATA = R.NEW(Y.FIELD.NO)
+
+        IF REGEXP(Y.FIELD.DATA, Y.REGEX) LT 1 AND Y.FIELD.DATA NE '' THEN
+            AF    = Y.FIELD.NO
+            AV    = 1
+            AS    = 1
+            ETEXT = Y.ERROR.ID
+            CALL STORE.END.ERROR
+        END
+    NEXT I
+
+    RETURN
+
+END
