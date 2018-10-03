@@ -12,7 +12,7 @@ Welcome to <b>t24localapi</b>. This is my current local development api that ext
 | Subroutine             | Type            | Attached on     | Description                               | Parameters |
 |------------------------|-----------------|-----------------|-------------------------------------------|------------|
 | VR.ADD.OFS.REQUEST     | Version Routine | BEFORE.AUTH.RTN | Add Addition OFS Request at Version Level |            |
-| VR.VALIDATE.REGEX      | Version Routine | INPUT.ROUTINE   | Validate fields based on REGEX defined    |            |
+| VR.VALIDATE.FIELDS.USING.REGEX      | Version Routine | INPUT.ROUTINE   | Validate fields based on REGEX defined    |            |
 |                        |                 |                 |                                           |            |
 
 <b>Deployment Guide </b>
