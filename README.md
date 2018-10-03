@@ -19,3 +19,5 @@ Welcome to <b>t24localapi</b>. This is my current local development api that ext
 
 1. Download the API needed
 1. Catalog the routine on your BP Folder
+
+> PS 1: I.m still creating a the Table structire. Please bear with me as a do this on my free time 
