@@ -10,12 +10,15 @@
 * BATCH               : N/A
 * SS FILE             : N/A
 * EB.API              : <Same with filename>
-* Associated          : VERSION>EB.XXX.GEN.PARAM,VALIDATE.FIELDS	
+* Associated          : VERSION>EB.XXX.GEN.PARAM,REGEX.VALIDATION	
 ****************************************************************
-* VERSION             :
-* DATE MODIFIED       :
-* MODIFIED BY         :
-* UPDATES             :
+* VERSION             : 1.1
+* DATE MODIFIED       : JAN-06-2019
+* MODIFIED BY         : Chua, Jayson G
+* UPDATES             : Amend logic on retrieving data on Local Field data
+*                     : Added variable Y.REGEX.MATCHED to support the negate expression
+*                       Y.REGEX.MATCHED EQ Y = Raised Error when REGEX expression matched
+*                       Y.REGEX.MATCHED EQ N = Raised Error when REGEX expression not matched
 ****************************************************************
     SUBROUTINE VR.VALIDATE.FIELDS.USING.REGEX
     $INSERT ../T24_BP I_COMMON
@@ -26,7 +29,7 @@
     GOSUB READFILES
 
     IF R.PARAM NE '' THEN
-        GOSUB READSS
+        GOSUB READ.SS
         GOSUB PROCESS
     END
 
@@ -42,14 +45,15 @@ OPENFILES:
 READFILES:
     Y.PARAM.ID = APPLICATION : PGM.VERSION
     CALL F.READ(FN.PARAM,Y.PARAM.ID,R.PARAM,F.PARAM,Y.ERR.PARAM)
-    Y.REGEX      = R.PARAM<EB.BUH7.GEN.PARAM.1>
-    Y.FIELDS     = R.PARAM<EB.BUH7.GEN.PARAM.1.1>
-    Y.FIELDS.CNT = DCOUNT(Y.FIELDS,@SM)
-    Y.ERROR.ID   = R.PARAM<EB.BUH7.GEN.PARAM.2>
-    Y.APP.NAME   = R.PARAM<EB.BUH7.REPORT.FILENAME>
+    Y.REGEX           = R.PARAM<EB.BUH7.GEN.PARAM.1>
+    Y.FIELDS          = R.PARAM<EB.BUH7.GEN.PARAM.1.1>
+    Y.FIELDS.CNT      = DCOUNT(Y.FIELDS,@SM)
+    Y.ERROR.ID        = R.PARAM<EB.BUH7.GEN.PARAM.2>
+    Y.REGEX.MATCHED   = R.PARAM<EB.BUH7.GEN.PARAM.3>
+    Y.APP.NAME        = R.PARAM<EB.BUH7.REPORT.FILENAME>
     RETURN
 
-READSS:
+READ.SS:
     Y.APP.NAME   = R.PARAM<EB.BUH7.REPORT.FILENAME>
     Y.APP.SS.REC = ''
     CALL GET.STANDARD.SELECTION.DETS(Y.APP.NAME, Y.APP.SS.REC)
@@ -59,10 +63,25 @@ PROCESS:
     FOR I = 1 TO Y.FIELDS.CNT
         Y.FIELD      = FIELD (Y.FIELDS,@SM,I,1)
 
-        CALL FIELD.NAMES.TO.NUMBERS(Y.FIELD, Y.APP.SS.REC, Y.FIELD.NO, '','', '', '', ERR.MSG)
-        Y.FIELD.DATA = R.NEW(Y.FIELD.NO)
-
-        IF REGEXP(Y.FIELD.DATA, Y.REGEX) LT 1 AND Y.FIELD.DATA NE '' THEN
+        CALL FIELD.NAMES.TO.NUMBERS(Y.FIELD, Y.APP.SS.REC, Y.FIELD.NO, Y.FM,Y.VM, Y.SM, '', ERR.MSG)
+        * Y.FIELD.DATA = R.NEW(Y.FIELD.NO)
+        Y.FIELD.DATA = R.NEW(Y.FIELD.NO)<1,Y.VM>
+		Y.REGEX.RESULT = REGEXP(Y.FIELD.DATA, Y.REGEX)			
+        Y.DISPLAY.ERROR = 0
+		
+        * Raised Error when Regex expression matched or not	
+        IF Y.REGEX.RESULT EQ 1 AND Y.FIELD.DATA NE '' AND Y.REGEX.MATCHED EQ 'Y' THEN
+			Y.DISPLAY.ERROR = 1
+        END
+		ELSE IF Y.REGEX.RESULT EQ 0 AND Y.FIELD.DATA NE '' AND Y.REGEX.MATCHED EQ 'N' THEN 
+			Y.DISPLAY.ERROR = 1		
+		END
+		ELSE IF Y.REGEX.RESULT LT 0 THEN
+			ETEXT = 'Invalid Expression ' : Y.REGEX.RESULT : '. Check EB.XXX.GEN.PARAM Table - ' : Y.REGEX.MATCHED
+            CALL STORE.END.ERROR
+		END			
+		* Display Error
+        IF Y.DISPLAY.ERROR EQ 1 THEN
             AF    = Y.FIELD.NO
             AV    = 1
             AS    = 1
@@ -72,5 +91,3 @@ PROCESS:
     NEXT I
 
     RETURN
-
-END
