@@ -5,7 +5,7 @@ This contains a list of my local development subroutines that will extend T24 fu
 
 ### Prerequisites
 1. T24 TAFC R12
-1. Local table created using EB.TABLE.DEFINITION
+1. Local table created using EB.TABLE.DEFINITION (BDUH001-GEN.TABLE.080119.zip)
 
 ***
 ### Local API
