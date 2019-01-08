@@ -4,7 +4,7 @@ This contains a list of my local development subroutines that will extend T24 fu
 ***
 
 ### Prerequisites
-1. T24 TAFC R12'
+1. T24 TAFC R12
 1. Local table created using EB.TABLE.DEFINITION
 
 ***
@@ -12,8 +12,8 @@ This contains a list of my local development subroutines that will extend T24 fu
 
 | Subroutine             | Type            | Attached on     | Description                               | Parameters |
 |------------------------|-----------------|-----------------|-------------------------------------------|------------|
-| VR.ADD.OFS.REQUEST                  | Version Routine | BEFORE.AUTH.RTN | Add Addition OFS Request at Version Level |            |
-| VR.VALIDATE.FIELDS.USING.REGEX      | Version Routine | INPUT.ROUTINE   | Validate fields based on REGEX defined    |            |
+| VR.ADD.OFS.REQUEST                  | Version Routine | BEFORE.AUTH.RTN | Add Additional OFS Request at Version Level |            |
+| VR.VALIDATE.FIELDS.USING.REGEX      | Version Routine | INPUT.ROUTINE   | Validate fields using on REGEX Expression    |            |
 |                                      |                 |                 |                                           |            |
 
 <b>Deployment Guide </b>
