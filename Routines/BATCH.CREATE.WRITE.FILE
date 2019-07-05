@@ -3,6 +3,7 @@
 * DATE CREATED        : 03/Jul/2019
 * AUTHOR              : Chua, Jayson
 * DESCRIPTION         : This will create/write file per agent. Files will be merge by BATCH.MERGE.WRITE.FILE routine
+*                       This will be placed on Main Batch routine
 * ASSOCIATED          : $BATCH.MERGE.WRITE.FILE
 *                       PGM FILE><Same with filename>
 * INPUT PARAMETERS      Y.FILE.DIR = File Directory
