@@ -1,0 +1,37 @@
+****************************************************************
+* VERSION             : 1.0
+* DATE CREATED        : 03/Jul/2019
+* AUTHOR              : Chua, Jayson
+* DESCRIPTION         : This will create/write file per agent. Files will be merge by BATCH.MERGE.WRITE.FILE routine
+* ASSOCIATED          : $BATCH.MERGE.WRITE.FILE
+*                       PGM FILE><Same with filename>
+* INPUT PARAMETERS      Y.FILE.DIR = File Directory
+*                       Y.FILENAME = File Name
+*                       Y.FILE.EXT = File extension 
+*                       Y.RECORD   = Record
+****************************************************************
+* VERSION             :
+* DATE MODIFIED       :
+* MODIFIED BY         :
+* UPDATES             :
+****************************************************************
+SUBROUTINE BATCH.CREATE.WRITE.FILE (Y.FILE.DIR,Y.FILENAME,Y.FILE.EXT,Y.RECORD)
+    $INSERT ../T24_BP I_COMMON
+    $INSERT ../T24_BP I_EQUATE
+    $INSERT ../T24_BP I_TSA.COMMON
+
+    IF Y.FILE.DIR EQ '' THEN
+        Y.FILE.DIR = "&SAVEDLISTS&"
+    END
+	
+    Y.FILE.NAME  = Y.FILE.DIR : '/' : AGENT.NUMBER : '_' :  Y.FILENAME : Y.FILE.EXT
+	
+    OPENSEQ Y.FILE.NAME TO F.FILE.VAR ELSE
+        CREATE F.FILE.VAR ELSE NULL
+    END
+
+    WRITESEQ Y.RECORD APPEND TO F.FILE.VAR ELSE NULL
+    CLOSESEQ F.FILE.VAR
+
+    RETURN	
+END
