@@ -3,7 +3,7 @@
 * DATE CREATED        : 03/Jul/2019
 * AUTHOR              : Chua, Jayson
 * DESCRIPTION         : This will merge files created by BUH.BATCH.CREATE.WRITE.FILE routine. 
-*                       This will be placed on .POST of .SELECT file of Batch routine(Using Control list)
+*                       This will be placed on .POST or .SELECT file of Batch routine(Using Control list)
 * ASSOCIATED          : $BATCH.CREATE.WRITE.FILE
 *                       PGM FILE><Same with filename>
 * INPUT PARAMETERS      Y.FILE.DIR  = File Directory
@@ -47,10 +47,11 @@ MERGE.LOG.FILE:
 * Retrive Files
 	SEL.CMD      = "SELECT " : FN.DIR : " '...": Y.FILENAME : Y.FILE.EXT : "'"
 	CALL EB.READLIST(SEL.CMD,SEL.LIST,'',NO.OF.REC,REC.ERR)
-	
+		
 	IF SEL.LIST THEN
 		* Create File	
-		Y.FILE.PATH  = Y.FILE.DIR : '/' : Y.FILENAME : '_' : Y.DATE.TIME : Y.FILE.EXT
+		Y.FILENAME   = Y.FILENAME : '_' : Y.DATE.TIME : Y.FILE.EXT
+		Y.FILE.PATH  = Y.FILE.DIR : '/' : Y.FILENAME
 		OPENSEQ Y.FILE.PATH TO F.FILE.VAR ELSE
 			CREATE F.FILE.VAR ELSE NULL
 		END
