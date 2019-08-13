@@ -4,10 +4,10 @@ This contains a list of my local development subroutines that will extend T24 fu
 ***
 
 ### Prerequisites
-1. T24 TAFC R12
+1. T24 TAFC R12*
 1. Local table created using EB.TABLE.DEFINITION (BDUH001-GEN.TABLE.xxxxxx.zip)
-1. PGM.FILE Record
-
+1. PGM.FILE Record for Function routine
+1. EB.API Record for Version routine
 ***
 ### Local API
 
