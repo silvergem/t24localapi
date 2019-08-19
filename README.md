@@ -4,10 +4,9 @@ This contains a list of my local development subroutines that will extend T24 fu
 ***
 
 ### Prerequisites
-1. T24 TAFC R12*
-1. Local table created using EB.TABLE.DEFINITION (BDUH001-GEN.TABLE.xxxxxx.zip)
-1. PGM.FILE Record for Function routine
-1. EB.API Record for Version routine
+1. T24 TAFC R12^
+1. Local table created using EB.TABLE.DEFINITION (BDUH001-GEN.TABLE.xxxxxx.zip)^^
+1. PGM.FILE Record for Function routine or EB.API Record for Version routine
 ***
 ### Local API
 
@@ -27,4 +26,5 @@ This contains a list of my local development subroutines that will extend T24 fu
 1. Download the API Routine needed
 1. Deploy and Catalog the routine on your BP Folder (You can rename or add prefix)
 
-P.S 1: Might work on lower releases
+^: Might work on lower releases <br />
+^^: For Version Routines only
