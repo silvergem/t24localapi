@@ -2,84 +2,103 @@
 * VERSION             : 1.0
 * DATE CREATED        : 27-SEP-2018
 * AUTHOR              : Chua, Jayson G
-* DESCRIPTION         : Local API Validation Routine attached at BEFORE.AUTH.RTN
-*                       Add OFS Request at Version Level
+* DESCRIPTION         : Local API Routine attached on field BEFORE.AUTH.RTN
+*                       Add Addition OFS Request at Version Level
 * REPORT NAME         :
 * PGM FILE            : N/A
 * TSA.SERVICE         : N/A
 * BATCH               : N/A
 * SS FILE             : N/A
 * EB.API              : <Same with filename>
-* Associated          : VERSION>EB.XXX.GEN.PARAM,OFS.ADD.LOCAL.REQUEST
+* Associated          : VERSION>EB.BUH.GEN.PARAM,OFS.ADD.LOCAL.REQUEST
 ****************************************************************
-* VERSION             :
-* DATE MODIFIED       :
-* MODIFIED BY         :
-* UPDATES             :
+* VERSION             : 1.1
+* DATE MODIFIED       : 15-JUL-2019
+* MODIFIED BY         : Chua, Jayson G
+* UPDATES             : Passing of parent application ID based on ID.NEW or specific field
+*                       Added prefix 'AOR-' as requirement on ID
 ****************************************************************
-SUBROUTINE VR.ADD.OFS.REQUEST
+SUBROUTINE BUH.VR.ADD.OFS.REQUEST
     $INSERT ../T24_BP I_COMMON
     $INSERT ../T24_BP I_EQUATE
     $INSERT ../BP     I_F.EB.BUH.GEN.PARAM
 
-	GOSUB INIT
+    GOSUB INIT
 
-	
-	IF Y.OFS.TXN.STAT THEN
-		GOSUB OPENFILES
-		GOSUB READFILES
-		GOSUB PROCESS.OFS
-	END
-	
-	RETURN
-	
+    IF Y.OFS.TXN.STAT THEN
+        GOSUB OPENFILES
+        GOSUB READFILES
+        GOSUB GET.ID.DATA
+        GOSUB PROCESS.OFS
+        GOSUB SHOW.ERR
+    END
+
+    RETURN
+
 INIT:
-	Y.OFS.TXN.STAT    = ''	
-	CALL ofs.isTxnSuccessful(Y.OFS.TXN.STAT)		
+    Y.OFS.TXN.STAT    = ''
+    Y.OFS.ID          = ''
+    R.OFS.DATA        = ''
+    CALL ofs.isTxnSuccessful(Y.OFS.TXN.STAT)
+    RETURN
+
 OPENFILES:
     FN.PARAM   = "F.EB.BUH.GEN.PARAM"
     F.PARAM    = ""
 
     CALL OPF(FN.PARAM,F.PARAM)
-    RETURN	
-	
-RETURN
-
-READFILES:
-    Y.PARAM.ID = APPLICATION : PGM.VERSION
-    CALL F.READ(FN.PARAM,Y.PARAM.ID,R.PARAM,F.PARAM,Y.ERR.PARAM)
-	Y.OFS.BR.VERSION.NAME = R.PARAM<EB.BUH7.OFS.VERSION>
-	Y.OFS.BR.APPLICATION  = FIELD(Y.OFS.BR.VERSION.NAME,",",1,1)
-	Y.OFS.BR.FUNCTION     = R.PARAM<EB.BUH7.OFS.FUNCTION>
-	Y.OFS.BR.MODE         = R.PARAM<EB.BUH7.OFS.TYPE>
-	Y.OFS.LR.MODE         = R.PARAM<EB.BUH7.OFS.LR.TYPE>
-	Y.SHOW.OFS.STR        = R.PARAM<EB.BUH7.GEN.PARAM.3>
-	
-	IF R.PARAM NE '' THEN
-		E = Y.ERROR	
-	END	
     RETURN
 
-PROCESS.OFS:
-*Set OFS Parameters
-	Y.APPLICATION             = Y.OFS.BR.APPLICATION 
-	Y.VERSION                 = Y.OFS.BR.VERSION.NAME
-	Y.FUNCTION                = Y.OFS.BR.FUNCTION
-	Y.PROCESS                 = Y.OFS.BR.MODE
-	Y.GTS.MODE                = '' 
-	Y.NO.AUTH                 = ''
+READFILES:
+    Y.PARAM.ID = 'AOR-' : APPLICATION : PGM.VERSION
+    CALL F.READ(FN.PARAM,Y.PARAM.ID,R.PARAM,F.PARAM,Y.ERR.PARAM)
+    Y.OFS.BR.VERSION.NAME = R.PARAM<EB.BUH7.OFS.VERSION>
+    Y.OFS.BR.APPLICATION  = FIELD(Y.OFS.BR.VERSION.NAME,",",1,1)
+    Y.OFS.BR.FUNCTION     = R.PARAM<EB.BUH7.OFS.FUNCTION>
+    Y.OFS.BR.MODE         = R.PARAM<EB.BUH7.OFS.TYPE>
+    Y.OFS.LR.MODE         = R.PARAM<EB.BUH7.OFS.LR.TYPE>
+    Y.OFS.ID              = R.PARAM<EB.BUH7.OFS.ID>
+    Y.SHOW.OFS.STR        = R.PARAM<EB.BUH7.GEN.PARAM.3>
 
-	CALL OFS.BUILD.RECORD(Y.APPLICATION,Y.FUNCTION,Y.PROCESS,Y.VERSION,Y.GTS.MODE,Y.NO.AUTH,"",R.OFS.DATA,Y.OFS.STRING)
-	CALL ofs.addLocalRequest(Y.OFS.STRING,Y.OFS.LR.MODE,Y.ERROR)
-	
-*Return Error on Version Level
-	IF Y.ERROR NE '' THEN	
-		E = Y.ERROR
-	END
-	
-	IF Y.SHOW.OFS.STR EQ 'Y' THEN
-	    E = 'OFS String is: ' : Y.OFS.STRING
-	END
-	
+    IF R.PARAM NE '' THEN
+        E = Y.ERR.PARAM
+        RETURN
+    END
+    RETURN
+
+GET.ID.DATA:
+    IF Y.OFS.ID EQ '@ID' THEN
+        Y.OFS.ID = ID.NEW
+    END
+    ELSE
+        CALL GET.STANDARD.SELECTION.DETS(Y.OFS.BR.APPLICATION, Y.OFS.ID)
+        CALL FIELD.NAMES.TO.NUMBERS(Y.FIELD, Y.OFS.ID, Y.FIELD.NO, '','', '', '', ERR.MSG)
+        Y.OFS.ID = R.NEW(Y.FIELD.NO)
+    END
+    RETURN
+
+PROCESS.OFS: *Set OFS Parameters
+    Y.APPLICATION             = Y.OFS.BR.APPLICATION
+    Y.VERSION                 = Y.OFS.BR.VERSION.NAME
+    Y.FUNCTION                = Y.OFS.BR.FUNCTION
+    Y.PROCESS                 = Y.OFS.BR.MODE
+    Y.GTS.MODE                = ''
+    Y.NO.AUTH                 = ''
+
+    CALL OFS.BUILD.RECORD(Y.APPLICATION,Y.FUNCTION,Y.PROCESS,Y.VERSION,Y.GTS.MODE,Y.NO.AUTH,Y.OFS.ID,R.OFS.DATA,Y.OFS.STRING)
+    CALL ofs.addLocalRequest(Y.OFS.STRING,Y.OFS.LR.MODE,Y.ERROR)
+    
 	RETURN
+	
+SHOW.ERR: *Return Error on Version Level
+    IF Y.ERROR NE '' THEN
+        E = Y.ERROR
+    END
+
+    IF Y.SHOW.OFS.STR EQ 'Y' THEN
+        E = 'OFS String is: ' : Y.OFS.STRING
+    END
+
+    RETURN
+	
 END
