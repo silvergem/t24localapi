@@ -1,8 +1,8 @@
 ****************************************************************
 * VERSION             : 1.0
-* DATE CREATED        : 06-SEP-2018
+* DATE CREATED        : SEP-06-2018
 * AUTHOR              : Chua, Jayson G
-* DESCRIPTION         : Local API Validation Routine attached at INPUT.ROUTINE
+* DESCRIPTION         : Local API Validation Routine attached on Version INPUT.ROUTINE
 *                       Validate fields based on REGEX defined at EB.XXX.GEN.PARAM
 * REPORT NAME         :
 * PGM FILE            : N/A
@@ -10,7 +10,7 @@
 * BATCH               : N/A
 * SS FILE             : N/A
 * EB.API              : <Same with filename>
-* Associated          : VERSION>EB.XXX.GEN.PARAM,REGEX.VALIDATION	
+* Associated          : VERSION>EB.XXX.GEN.PARAM,ADD.REGEX
 ****************************************************************
 * VERSION             : 1.1
 * DATE MODIFIED       : JAN-06-2019
@@ -20,7 +20,18 @@
 *                       Y.REGEX.MATCHED EQ Y = Raised Error when REGEX expression matched
 *                       Y.REGEX.MATCHED EQ N = Raised Error when REGEX expression not matched
 ****************************************************************
-    SUBROUTINE VR.VALIDATE.FIELDS.USING.REGEX
+* VERSION             : 1.2
+* DATE MODIFIED       : JAN-14-2019
+* MODIFIED BY         : Chua, Jayson G
+* UPDATES             : Added support on multivalue fields
+****************************************************************
+* VERSION             : 1.2
+* DATE MODIFIED       : AUG-23-2019
+* MODIFIED BY         : Chua, Jayson G
+* UPDATES             : Rename to BUH.VR.ADD.REGEX
+*                     : Add Prefix 'AR-'
+****************************************************************
+    SUBROUTINE VR.ADD.REGEX
     $INSERT ../T24_BP I_COMMON
     $INSERT ../T24_BP I_EQUATE
     $INSERT ../BP     I_F.EB.BUH.GEN.PARAM
@@ -43,7 +54,7 @@ OPENFILES:
     RETURN
 
 READFILES:
-    Y.PARAM.ID = APPLICATION : PGM.VERSION
+    Y.PARAM.ID = "AR-" : APPLICATION : PGM.VERSION
     CALL F.READ(FN.PARAM,Y.PARAM.ID,R.PARAM,F.PARAM,Y.ERR.PARAM)
     Y.REGEX           = R.PARAM<EB.BUH7.GEN.PARAM.1>
     Y.FIELDS          = R.PARAM<EB.BUH7.GEN.PARAM.1.1>
@@ -62,32 +73,39 @@ READ.SS:
 PROCESS:
     FOR I = 1 TO Y.FIELDS.CNT
         Y.FIELD      = FIELD (Y.FIELDS,@SM,I,1)
-
         CALL FIELD.NAMES.TO.NUMBERS(Y.FIELD, Y.APP.SS.REC, Y.FIELD.NO, Y.FM,Y.VM, Y.SM, '', ERR.MSG)
         * Y.FIELD.DATA = R.NEW(Y.FIELD.NO)
-        Y.FIELD.DATA = R.NEW(Y.FIELD.NO)<1,Y.VM>
-		Y.REGEX.RESULT = REGEXP(Y.FIELD.DATA, Y.REGEX)			
-        Y.DISPLAY.ERROR = 0
-		
-        * Raised Error when Regex expression matched or not	
-        IF Y.REGEX.RESULT EQ 1 AND Y.FIELD.DATA NE '' AND Y.REGEX.MATCHED EQ 'Y' THEN
-			Y.DISPLAY.ERROR = 1
-        END
-		ELSE IF Y.REGEX.RESULT EQ 0 AND Y.FIELD.DATA NE '' AND Y.REGEX.MATCHED EQ 'N' THEN 
-			Y.DISPLAY.ERROR = 1		
-		END
-		ELSE IF Y.REGEX.RESULT LT 0 THEN
-			ETEXT = 'Invalid Expression ' : Y.REGEX.RESULT : '. Check EB.XXX.GEN.PARAM Table - ' : Y.REGEX.MATCHED
-            CALL STORE.END.ERROR
-		END			
-		* Display Error
-        IF Y.DISPLAY.ERROR EQ 1 THEN
-            AF    = Y.FIELD.NO
-            AV    = 1
-            AS    = 1
-            ETEXT = Y.ERROR.ID
-            CALL STORE.END.ERROR
-        END
+        Y.FIELD.DATA     = R.NEW(Y.FIELD.NO)<1,Y.VM>
+        Y.FIELD.DATA.CNT = DCOUNT(Y.FIELD.DATA,@SM)
+        
+        * To accommodate checking per field at multi-value
+        FOR J = 1 TO Y.FIELD.DATA.CNT    
+            Y.REGEX.RESULT   = REGEXP(FIELD (Y.FIELD.DATA,@SM,J,1), Y.REGEX)
+            Y.DISPLAY.ERROR  = 0        
+        
+            * Raised Error when Regex expression matched or not    
+            IF Y.REGEX.RESULT EQ 1 AND Y.FIELD.DATA NE '' AND Y.REGEX.MATCHED EQ 'Y' THEN
+                Y.DISPLAY.ERROR = 1
+            END
+            ELSE IF Y.REGEX.RESULT EQ 0 AND Y.FIELD.DATA NE '' AND Y.REGEX.MATCHED EQ 'N' THEN 
+                Y.DISPLAY.ERROR = 1        
+            END
+            ELSE IF Y.REGEX.RESULT LT 0 THEN
+                ETEXT = 'Invalid Expression ' : Y.REGEX.RESULT : '. Check EB.XXX.GEN.PARAM Table - ' : Y.REGEX.MATCHED
+                CALL STORE.END.ERROR
+            END
+            
+            * Display Error
+            IF Y.DISPLAY.ERROR EQ 1 THEN
+                AF    = Y.FIELD.NO
+                AV    = J
+                AS    = ""
+                ETEXT = Y.ERROR.ID
+                CALL STORE.END.ERROR
+            END
+        NEXT J
     NEXT I
 
     RETURN
+
+END
