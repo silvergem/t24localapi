@@ -1,0 +1,46 @@
+****************************************************************
+* VERSION             : 1.0
+* DATE CREATED        : 22-AUG-2019
+* AUTHOR              : Chua, Jayson G
+* DESCRIPTION         : Create record on HOLD.CONTROL Application
+* REPORT NAME         :
+* PGM FILE            : N/A
+* TSA.SERVICE         : N/A
+* BATCH               : N/A
+* SS FILE             : N/A
+* EB.API              : N/A
+* Associated          : N/A
+****************************************************************
+* VERSION             : 
+* DATE MODIFIED       : 
+* MODIFIED BY         : 
+* UPDATES             : 
+****************************************************************
+SUBROUTINE ADD.HOLD.CONTROL.RECORD (Y.RPT.DIR,Y.RPT.NAME,Y.HLD.ID,Y.RPT.CONTROL,Y.ERR)
+
+    $INSERT ../T24_BP I_COMMON
+    $INSERT ../T24_BP I_EQUATE
+    $INSERT ../T24_BP I_F.HOLD.CONTROL
+    
+    IF Y.RPT.NAME AND Y.RPT.CONTROL AND Y.RPT.DIR THEN
+        Y.HLD.ID = ''
+		CALL OPF('F.HOLD.CONTROL',F.HOLD.CONTROL)
+        CALL RC.GET.HOLD.ID(Y.HLD.ID)
+        READU R.HOLD.CONTROL FROM F.HOLD.CONTROL,Y.HLD.ID ELSE END
+
+        R.HOLD.CONTROL                        = ''
+        R.HOLD.CONTROL<HCF.USER>              = OPERATOR
+        R.HOLD.CONTROL<HCF.REPORT.NAME>       = Y.RPT.CONTROL
+        R.HOLD.CONTROL<HCF.COMPANY.ID>        = ID.COMPANY
+        R.HOLD.CONTROL<HCF.DATE.CREATED>      = TODAY 
+        R.HOLD.CONTROL<HCF.TIME.CREATED>      = TIMEDATE()[1,2]:TIMEDATE()[4,2]
+        R.HOLD.CONTROL<HCF.BANK.DATE>         = TODAY
+        R.HOLD.CONTROL<HCF.CARRIER.ADDR.NO>   = Y.RPT.DIR : '>': Y.RPT.NAME
+        WRITE R.HOLD.CONTROL ON F.HOLD.CONTROL,Y.HLD.ID
+    END
+	ELSE
+			Y.ERR = 'Incomplete Details'
+	END
+
+RETURN
+END
