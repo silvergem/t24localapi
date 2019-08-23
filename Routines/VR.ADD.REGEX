@@ -2,7 +2,7 @@
 * VERSION             : 1.0
 * DATE CREATED        : SEP-06-2018
 * AUTHOR              : Chua, Jayson G
-* DESCRIPTION         : Local API Validation Routine attached on Version INPUT.ROUTINE
+* DESCRIPTION         : Local API Validation Routine attached on Version or Version control INPUT.ROUTINE
 *                       Validate fields based on REGEX defined at EB.XXX.GEN.PARAM
 * REPORT NAME         :
 * PGM FILE            : N/A
@@ -30,6 +30,7 @@
 * MODIFIED BY         : Chua, Jayson G
 * UPDATES             : Rename to BUH.VR.ADD.REGEX
 *                     : Add Prefix 'AR-' as requirement on Param ID
+*                     : Can be atached on VERSION.CONTROL
 ****************************************************************
     SUBROUTINE VR.ADD.REGEX
     $INSERT ../T24_BP I_COMMON
