@@ -29,7 +29,7 @@
 * DATE MODIFIED       : AUG-23-2019
 * MODIFIED BY         : Chua, Jayson G
 * UPDATES             : Rename to BUH.VR.ADD.REGEX
-*                     : Add Prefix 'AR-'
+*                     : Add Prefix 'AR-' as requirement on Param ID
 ****************************************************************
     SUBROUTINE VR.ADD.REGEX
     $INSERT ../T24_BP I_COMMON
