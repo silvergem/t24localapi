@@ -8,6 +8,7 @@
 *                       PGM FILE><Same with filename>
 * INPUT PARAMETERS      Y.FILE.DIR  = File Directory
 *                       Y.FILENAME  = File Name
+*                       Y.SUBHEADER = Subheader on first row
 *                       Y.TIMESTAMP = Option to place timespamp, Set yo 'Y'  
 * OUTPUT PARAMETERS     Y.ERR       = Error
 ****************************************************************
@@ -16,7 +17,7 @@
 * MODIFIED BY         :
 * UPDATES             :
 ****************************************************************
-SUBROUTINE BATCH.MERGE.WRITE.FILE (Y.FILE.DIR,Y.FILENAME,Y.FILE.EXT,Y.TIMESTAMP,Y.ERR)
+SUBROUTINE BATCH.MERGE.WRITE.FILE (Y.FILE.DIR,Y.FILENAME,Y.SUBHEADER,Y.FILE.EXT,Y.TIMESTAMP,Y.ERR)
     $INSERT ../T24_BP I_COMMON
     $INSERT ../T24_BP I_EQUATE
     $INSERT ../T24_BP I_BATCH.FILES
@@ -55,6 +56,10 @@ MERGE.LOG.FILE:
 		OPENSEQ Y.FILE.PATH TO F.FILE.VAR ELSE
 			CREATE F.FILE.VAR ELSE NULL
 		END
+		
+		IF Y.SUBHEADER THEN
+			Y.DATA.FINAL<-1> = Y.SUBHEADER
+		END		
 
 		* Read log files and merge to one
 		FOR I = 1 TO NO.OF.REC
